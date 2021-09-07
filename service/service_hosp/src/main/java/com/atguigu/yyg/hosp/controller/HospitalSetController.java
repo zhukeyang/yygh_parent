@@ -52,7 +52,7 @@ public class HospitalSetController {
     }
     //3.条件查询带分页
     @ApiOperation(value = "条件查询带分页")
-    @PostMapping("findPage/{current}/{limit}")
+    @PostMapping("findPageHospSet/{current}/{limit}")
     public Result findPageHospSet(@PathVariable long current, @PathVariable long limit,
                                   @RequestBody(required = false) HospitalSetQueryVo hospitalSetQueryVo)
     {
@@ -97,7 +97,7 @@ public class HospitalSetController {
 
     //5.根据id获取医院设置
     @ApiOperation(value = "根据id获取医院设置")
-    @GetMapping("getHospset/{id}")
+    @GetMapping("getHospSet/{id}")
     public Result getHospSet(@PathVariable Long id)
     {
         HospitalSet hospitalSet = hospitalSetService.getById(id);
@@ -106,7 +106,7 @@ public class HospitalSetController {
 
     //6.修改医院设置
     @ApiOperation(value = "修改医院设置")
-    @PostMapping("updateHospSet")
+    @PostMapping("updateHospitalSet")
     public Result updateHospSet(@RequestBody HospitalSet hospitalSet)
     {
         boolean flag = hospitalSetService.updateById(hospitalSet);
