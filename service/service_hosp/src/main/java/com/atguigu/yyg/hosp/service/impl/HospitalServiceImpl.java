@@ -12,11 +12,11 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class HospitalServiceImpl implements HospitalService {
+
     @Autowired
     private HospitalRepository hospitalRepository;
 
@@ -25,37 +25,34 @@ public class HospitalServiceImpl implements HospitalService {
 
     @Override
     public void save(Map<String, Object> paramMap) {
-        //把参数的map集合转换位对象Hospital
+        //把参数map集合转换对象 Hospital
         String mapString = JSONObject.toJSONString(paramMap);
         Hospital hospital = JSONObject.parseObject(mapString, Hospital.class);
-        //1.先判断是否存在相同数据
+
+        //判断是否存在数据
         String hoscode = hospital.getHoscode();
-        Hospital hospitalExist=hospitalRepository.getHospitalByHoscode(hoscode);
-        //如果不存在，进行添加
-        if(hospitalExist!=null)
-        {
+        Hospital hospitalExist = hospitalRepository.getHospitalByHoscode(hoscode);
+
+        //如果存在，进行修改
+        if(hospitalExist != null) {
             hospital.setStatus(hospitalExist.getStatus());
             hospital.setCreateTime(hospitalExist.getCreateTime());
             hospital.setUpdateTime(new Date());
             hospital.setIsDeleted(0);
             hospitalRepository.save(hospital);
-        }
-        //如果不存在，进行添加
-        else
-        {
+        } else {//如果不存在，进行添加
             hospital.setStatus(0);
             hospital.setCreateTime(new Date());
             hospital.setUpdateTime(new Date());
             hospital.setIsDeleted(0);
             hospitalRepository.save(hospital);
         }
-
     }
 
     @Override
     public Hospital getByHoscode(String hoscode) {
-        Hospital hospitalByHoscode = hospitalRepository.getHospitalByHoscode(hoscode);
-        return hospitalByHoscode;
+        Hospital hospital = hospitalRepository.getHospitalByHoscode(hoscode);
+        return hospital;
     }
 
     //医院列表(条件查询分页)
@@ -83,6 +80,7 @@ public class HospitalServiceImpl implements HospitalService {
         return pages;
     }
 
+
     //获取查询list集合，遍历进行医院等级封装
     private Hospital setHospitalHosType(Hospital hospital) {
         //根据dictCode和value获取医院等级名称
@@ -91,7 +89,7 @@ public class HospitalServiceImpl implements HospitalService {
         String provinceString = dictFeignClient.getName(hospital.getProvinceCode());
         String cityString = dictFeignClient.getName(hospital.getCityCode());
         String districtString = dictFeignClient.getName(hospital.getDistrictCode());
-        System.out.println("dict.getName"+dictFeignClient.getName("Hostype", hospital.getHostype()));
+
         hospital.getParam().put("fullAddress",provinceString+cityString+districtString);
         hospital.getParam().put("hostypeString",hostypeString);
         return hospital;

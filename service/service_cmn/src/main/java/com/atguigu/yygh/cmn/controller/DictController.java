@@ -54,14 +54,13 @@ public class DictController {
     public String getName(@PathVariable String dictCode,
                           @PathVariable String value) {
         String dictName = dictService.getDictName(dictCode,value);
-        System.out.println(dictName);
         return dictName;
     }
+
     //根据value查询
     @GetMapping("getName/{value}")
     public String getName(@PathVariable String value) {
         String dictName = dictService.getDictName("",value);
-        System.out.println(dictName);
         return dictName;
     }
     //根据dict_code查询 省 市
@@ -70,6 +69,6 @@ public class DictController {
     public Result findByDictCode(@PathVariable String dictCode)
     {
         List<Dict> list=dictService.findByDictCode(dictCode);
-        return Result.ok();
+        return Result.ok(list);
     }
 }

@@ -25,7 +25,7 @@ public class HospitalController {
         Page<Hospital> pageModel = hospitalService.selectHospPage(page,limit,hospitalQueryVo);
         List<Hospital> content = pageModel.getContent();
         long totalElements = pageModel.getTotalElements();
-        System.out.println("hospitalQueryVo"+hospitalQueryVo);
+
         return Result.ok(pageModel);
     }
 
