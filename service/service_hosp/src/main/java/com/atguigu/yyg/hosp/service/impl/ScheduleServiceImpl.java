@@ -2,9 +2,9 @@ package com.atguigu.yyg.hosp.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.yyg.hosp.repository.ScheduleRepository;
+import com.atguigu.yyg.hosp.service.DepartmentService;
 import com.atguigu.yyg.hosp.service.HospitalService;
 import com.atguigu.yyg.hosp.service.ScheduleService;
-import com.atguigu.yygh.model.hosp.Department;
 import com.atguigu.yygh.model.hosp.Schedule;
 import com.atguigu.yygh.vo.hosp.BookingScheduleRuleVo;
 import com.atguigu.yygh.vo.hosp.ScheduleQueryVo;
@@ -17,7 +17,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -33,6 +32,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private HospitalService hospitalService;
+    @Autowired
+    private DepartmentService departmentService;
+
 
     @Override
     public void save(Map<String, Object> paramMap) {
@@ -133,6 +135,28 @@ public class ScheduleServiceImpl implements ScheduleService {
         result.put("baseMap",baseMap);
         return result;
     }
+
+    @Override
+    public List<Schedule> getDetailSchedule(String hoscode, String depcode, String workDate) {
+        //根据参数查询mongodb
+        List<Schedule> scheduleList=scheduleRepository.findScheduleByHoscodeAndDepcodeAndWorkDate(hoscode,depcode,new DateTime(workDate).toDate());
+        //把得到的list集合遍历，添加其它值
+        scheduleList.stream().forEach(item->{
+            this.packageSchedule(item);
+        });
+        return scheduleList;
+    }
+
+    //封装排班详情其他值
+    private void packageSchedule(Schedule schedule) {
+        //设置医院名称
+        schedule.getParam().put("hosname",hospitalService.getHospName(schedule.getHoscode()));
+        //设置科室名称
+        schedule.getParam().put("depname",departmentService.getDepName(schedule.getHoscode(),schedule.getDepcode()));
+        //设置星期对应星期
+        schedule.getParam().put("dayOfWeek",this.getDayOfWeek(new DateTime(schedule.getWorkDate())));
+    }
+
     /**
      * 根据日期获取周几数据
      * @param dateTime
