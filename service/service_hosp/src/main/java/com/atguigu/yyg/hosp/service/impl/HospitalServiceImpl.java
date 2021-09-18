@@ -12,7 +12,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class HospitalServiceImpl implements HospitalService {
@@ -80,6 +82,33 @@ public class HospitalServiceImpl implements HospitalService {
         return pages;
     }
 
+    @Override
+    public void updateStatus(String id, Integer status) {
+        //根据id查询医院信息
+        Hospital hospital = hospitalRepository.findById(id).get();
+        hospital.setStatus(status);
+        hospital.setUpdateTime(new Date());
+        hospitalRepository.save(hospital);
+    }
+
+    @Override
+    public Map<String,Object> getHospById(String id) {
+        Hospital hospital = this.setHospitalHosType(hospitalRepository.findById(id).get());
+        Map<String,Object> result=new HashMap<>();
+        //医院基本信息
+        result.put("hospital",hospital);
+        result.put("bookingRule",hospital.getBookingRule());
+        hospital.setBookingRule(null);
+        return result;
+    }
+
+    @Override
+    public String findAddressById(String id) {
+        Hospital hospital = hospitalRepository.findById(id).get();
+        String address = hospital.getAddress();
+        return address;
+    }
+
 
     //获取查询list集合，遍历进行医院等级封装
     private Hospital setHospitalHosType(Hospital hospital) {
@@ -89,7 +118,6 @@ public class HospitalServiceImpl implements HospitalService {
         String provinceString = dictFeignClient.getName(hospital.getProvinceCode());
         String cityString = dictFeignClient.getName(hospital.getCityCode());
         String districtString = dictFeignClient.getName(hospital.getDistrictCode());
-
         hospital.getParam().put("fullAddress",provinceString+cityString+districtString);
         hospital.getParam().put("hostypeString",hostypeString);
         return hospital;
